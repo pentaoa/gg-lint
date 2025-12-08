@@ -3,7 +3,9 @@
 import { Card } from "@/components/ui/card";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
-import rehypeSanitize from "rehype-sanitize";
+import remarkMath from "remark-math";
+import rehypeKatex from "rehype-katex";
+import "katex/dist/katex.min.css";
 
 interface MarkdownPreviewProps {
   markdown: string;
@@ -18,8 +20,8 @@ export default function MarkdownPreview({ markdown }: MarkdownPreviewProps) {
         {markdown ? (
           <div className="markdown-preview max-w-none">
             <ReactMarkdown
-              remarkPlugins={[remarkGfm]}
-              rehypePlugins={[rehypeSanitize]}
+              remarkPlugins={[remarkGfm, remarkMath]}
+              rehypePlugins={[rehypeKatex]}
             >
               {markdown}
             </ReactMarkdown>

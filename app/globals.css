@@ -272,3 +272,14 @@
 .dark .markdown-preview th {
   background-color: oklch(0.268 0.007 34.298);
 }
+
+/* 数学公式样式 */
+.markdown-preview .katex {
+  font-size: 1.1em;
+}
+
+.markdown-preview .katex-display {
+  margin: 1em 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+}

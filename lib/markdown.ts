@@ -5,12 +5,14 @@ import { unified } from "unified";
 import remarkParse from "remark-parse";
 import remarkGfm from "remark-gfm";
 import remarkStringify from "remark-stringify";
+import remarkMath from "remark-math";
 import type { Root, Heading, Text, PhrasingContent } from "mdast";
 import { visit } from "unist-util-visit";
 
 /**
- * 自定义 remark 插件：修复标题层级
- * 确保标题从 # 开始，最多 6 级
+ * 自定义 remark 插件：修复标题层级（可选）
+ * 仅在标题层级异常时才调整（例如从 h4 开始）
+ * 保留原始层级关系
  */
 function remarkFixHeadings() {
   return (tree: Root) => {
@@ -21,13 +23,18 @@ function remarkFixHeadings() {
       headings.push(node);
     });
 
-    // 重新计算层级
+    // 只有在标题不是从合理层级开始时才调整
     if (headings.length > 0) {
       const minDepth = Math.min(...headings.map(h => h.depth));
-      headings.forEach(heading => {
-        // 调整为从 1 开始，最多 6 级
-        heading.depth = Math.min(6, Math.max(1, heading.depth - minDepth + 1)) as 1 | 2 | 3 | 4 | 5 | 6;
-      });
+      
+      // 只有当最小层级 > 3 时才调整（例如从 h4 开始的情况）
+      // h1, h2, h3 开始都是合理的，保持原样
+      if (minDepth > 3) {
+        const offset = minDepth - 1; // 调整到从 h1 开始
+        headings.forEach(heading => {
+          heading.depth = Math.min(6, Math.max(1, heading.depth - offset)) as 1 | 2 | 3 | 4 | 5 | 6;
+        });
+      }
     }
   };
 }
@@ -117,12 +124,53 @@ export async function convertHtmlToMarkdown(html: string): Promise<string> {
     const gfmTables = turndownPluginGfm.tables;
     turndownService.use(gfmTables);
 
+    // 添加数学公式块支持
+    turndownService.addRule('mathBlock', {
+      filter: (node) => {
+        return node.nodeName === 'DIV' && 
+               (node.classList.contains('math-block') || 
+                node.getAttribute('data-math') !== null);
+      },
+      replacement: (content, node: any) => {
+        const math = node.getAttribute('data-math');
+        if (math) {
+          return '\n$$\n' + math + '\n$$\n';
+        }
+        return content;
+      }
+    });
+
+    // 添加行内数学公式支持
+    turndownService.addRule('mathInline', {
+      filter: (node) => {
+        return node.nodeName === 'SPAN' && 
+               (node.classList.contains('math-inline') || 
+                (node.parentNode as Element)?.classList?.contains('katex'));
+      },
+      replacement: (content, node: any) => {
+        const math = node.getAttribute('data-math');
+        if (math) {
+          return '$' + math + '$';
+        }
+        // 尝试从 KaTeX 渲染的内容中提取
+        const katexNode = node.closest('.katex');
+        if (katexNode) {
+          const mathAttr = katexNode.parentNode?.getAttribute?.('data-math');
+          if (mathAttr) {
+            return '$' + mathAttr + '$';
+          }
+        }
+        return content;
+      }
+    });
+
     const rawMarkdown = turndownService.turndown(html);
 
     // 第二步：使用 remark 修复和规范化
     const file = await unified()
       .use(remarkParse) // 解析 Markdown
       .use(remarkGfm) // 支持 GitHub Flavored Markdown
+      .use(remarkMath) // 解析数学为 AST（inlineMath/math），避免错误转义
       .use(remarkFixHeadings) // 修复标题层级
       .use(remarkFixEmphasis) // 修复粗体斜体
       .use(remarkCleanWhitespace) // 清理空行
@@ -134,7 +182,6 @@ export async function convertHtmlToMarkdown(html: string): Promise<string> {
         listItemIndent: "one",
       }) // 转回 Markdown
       .process(rawMarkdown);
-
     return String(file);
   } catch (error) {
     console.error("Markdown conversion error:", error);

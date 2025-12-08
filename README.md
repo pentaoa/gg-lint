@@ -56,11 +56,8 @@ npm start
 2. 授权 GitHub
 3. 一键部署完成
 
-#### 部署到 Cloudflare Pages
+可选增强
 
-1. 登录 Cloudflare Dashboard
-2. 选择 Pages → Create a project
-3. 连接 GitHub 仓库
-4. 构建配置：
-   - 构建命令：`npm run build`
-   - 输出目录：`out`## 📖 使用方法
+* 需要支持化学公式或更丰富的 LaTeX 宏，可添加 KaTeX `macros` 配置到 `rehypeKatex`：
+  * 可以把 `rehypeKatex` 调用改为：`[rehypeKatex, { macros: { '\\RR': '\\mathbb{R}' } }]` 等。
+* 需要在渲染中允许 HTML 与数学混排（谨慎）：可加入 `rehype-raw` 与 `rehype-sanitize` 做白名单过滤。可以按你的页面安全策略配置。
