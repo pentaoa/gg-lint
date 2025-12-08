@@ -1,36 +1,66 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# gg-lint
 
-## Getting Started
+**一键修复网页复制的 Markdown 格式**
 
-First, run the development server:
+专治「从网页复制到 Markdown 后格式全崩」的在线小工具。一键把乱七八糟的网页内容变成干净、规范、可直接用于 Obsidian / Typora / Notion 的 Markdown。
+
+## 特性
+
+- ✅ **零后端**：完全前端运行，无需登录，数据不上传
+- ✅ **智能转换**：自动识别 HTML 并转换为标准 Markdown
+- ✅ **格式修复**：
+  - 自动调整标题层级（从 # 开始）
+  - 修复粗体斜体（***text*** → **text**）
+  - 统一列表缩进（2 空格）
+  - 清理多余空行
+  - 修复图片 alt 文本
+- ✅ **实时预览**：左侧输入，右侧实时显示效果
+- ✅ **层级调整**：一键提升/降低标题层级
+- ✅ **一键复制**：复制到剪贴板，直接粘贴使用
+- ✅ **响应式设计**：支持桌面和移动设备
+- ✅ **PWA 支持**：可安装到桌面，像原生应用一样使用 （待验证)
+
+## 快速开始
+
+### 本地运行
 
 ```bash
+# 克隆项目
+git clone https://github.com/yourusername/gg-lint.git
+cd gg-lint
+
+# 安装依赖
+npm install
+
+# 启动开发服务器
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+访问 [http://localhost:3000](http://localhost:3000) 即可使用。
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### 构建和部署
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+# 构建生产版本
+npm run build
 
-## Learn More
+# 本地预览（可选）
+npm start
+```
 
-To learn more about Next.js, take a look at the following resources:
+#### 部署到 Vercel
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/yourusername/gg-lint)
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+1. 点击上方按钮
+2. 授权 GitHub
+3. 一键部署完成
 
-## Deploy on Vercel
+#### 部署到 Cloudflare Pages
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+1. 登录 Cloudflare Dashboard
+2. 选择 Pages → Create a project
+3. 连接 GitHub 仓库
+4. 构建配置：
+   - 构建命令：`npm run build`
+   - 输出目录：`out`## 📖 使用方法
