@@ -1,16 +1,51 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import EditorInput from "@/components/EditorInput";
 import MarkdownPreview from "@/components/MarkdownPreview";
-import CopyButton from "@/components/CopyButton";
+import CopyButton, { type CopyButtonHandle } from "@/components/CopyButton";
 import { convertHtmlToMarkdown, adjustHeadingLevel } from "@/lib/markdown";
 import { ChevronUp, ChevronDown } from "lucide-react";
 
 export default function Home() {
   const [markdown, setMarkdown] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [isMac, setIsMac] = useState(false);
+  const copyButtonRef = useRef<CopyButtonHandle>(null);
+
+  // Detect OS for keyboard shortcuts
+  useEffect(() => {
+    setIsMac(navigator.platform.toUpperCase().indexOf('MAC') >= 0);
+  }, []);
+
+  // Keyboard shortcuts
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      const modifierKey = isMac ? e.metaKey : e.ctrlKey;
+      
+      // Cmd/Ctrl + K: Copy Markdown
+      if (modifierKey && e.key === 'k' && !e.shiftKey && !isLoading && markdown) {
+        e.preventDefault();
+        handleCopyMarkdown();
+        return;
+      }
+      
+      // Cmd/Ctrl + Shift + Up/Down: Adjust heading levels
+      if (modifierKey && e.shiftKey && !isLoading && markdown) {
+        if (e.key === 'ArrowUp') {
+          e.preventDefault();
+          handleAdjustHeading('increase');
+        } else if (e.key === 'ArrowDown') {
+          e.preventDefault();
+          handleAdjustHeading('decrease');
+        }
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [markdown, isLoading, isMac]);
 
   const handleConvert = async (html: string) => {
     setIsLoading(true);
@@ -38,6 +73,11 @@ export default function Home() {
     }
   };
 
+  const handleCopyMarkdown = async () => {
+    if (!markdown || !copyButtonRef.current) return;
+    await copyButtonRef.current.triggerCopy();
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-950 dark:to-slate-900">
       {/* Header */}
@@ -47,29 +87,23 @@ export default function Home() {
             <div>
               <h1 className="text-2xl font-bold tracking-tight">GG Lint</h1>
               <p className="text-sm text-muted-foreground">
-                一键修复网页复制的 Markdown 格式
+                格式化和修复 AI 生成的网页富文本
               </p>
             </div>
-            <a
-              href="https://github.com/pentaoa/gg-lint"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-            >
-              GitHub
-            </a>
           </div>
         </div>
       </header>
 
       {/* Main Content */}
-      <main className="container mx-auto px-4 py-8 h-[calc(100vh-120px)]">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 h-full">
+      <main className="container mx-auto px-4 py-8">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 min-h-[calc(100vh-300px)]">
           {/* Left: Input */}
-          <EditorInput onConvert={handleConvert} isLoading={isLoading} />
+          <div className="flex flex-col min-h-[500px] lg:h-auto">
+            <EditorInput onConvert={handleConvert} isLoading={isLoading} />
+          </div>
 
           {/* Right: Preview */}
-          <div className="flex flex-col gap-4 h-full overflow-hidden">
+          <div className="flex flex-col gap-4 min-h-[500px] lg:h-auto">
             <div className="flex-1 min-h-0">
               <MarkdownPreview markdown={markdown} />
             </div>
@@ -79,29 +113,34 @@ export default function Home() {
               <div className="flex gap-1 flex-1">
                 <Button
                   variant="outline"
-                  size="sm"
+                  size="lg"
                   onClick={() => handleAdjustHeading("increase")}
                   disabled={!markdown || isLoading}
                   className="flex-1"
-                  title="提升标题层级（# → ##）"
+                  title={`提升标题层级 (${isMac ? '⌘' : 'Ctrl'}+Shift+↑)`}
                 >
                   <ChevronUp className="h-4 w-4 mr-1" />
                   提升层级
                 </Button>
                 <Button
                   variant="outline"
-                  size="sm"
+                  size="lg"
                   onClick={() => handleAdjustHeading("decrease")}
                   disabled={!markdown || isLoading}
                   className="flex-1"
-                  title="降低标题层级（## → #）"
+                  title={`降低标题层级 (${isMac ? '⌘' : 'Ctrl'}+Shift+↓)`}
                 >
                   <ChevronDown className="h-4 w-4 mr-1" />
                   降低层级
                 </Button>
               </div>
               <div className="flex-1">
-                <CopyButton markdown={markdown} disabled={isLoading} />
+                <CopyButton 
+                  ref={copyButtonRef}
+                  markdown={markdown} 
+                  disabled={isLoading}
+                  isMac={isMac}
+                />
               </div>
             </div>
           </div>
@@ -110,17 +149,35 @@ export default function Home() {
 
       {/* Footer */}
       <footer className="border-t mt-8 py-6 text-center text-sm text-muted-foreground">
-        <p>
-          我们不会上传您的数据 |{" "}
-          <a
-            href="https://github.com/pentaoa/gg-lint"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="underline hover:text-foreground"
-          >
-            © 2025 pentaoa
-          </a>
-        </p>
+        <div className="container mx-auto px-4 space-y-3">
+          <p className="text-xs leading-relaxed">
+            我们将定期对 <strong className="text-foreground">Gemini</strong>、
+            <strong className="text-foreground">ChatGPT</strong>、
+            <strong className="text-foreground">Grok</strong> 等主流平台进行格式配准
+            <br />
+            如果遇到问题，请在{" "}
+            <a
+              href="https://github.com/pentaoa/gg-lint/issues"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="underline hover:text-foreground font-medium"
+            >
+              GitHub Issues
+            </a>{" "}
+            反馈
+          </p>
+          <p className="text-xs">
+            我们不会上传您的数据 |{" "}
+            <a
+              href="https://github.com/pentaoa/gg-lint"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="underline hover:text-foreground"
+            >
+              © 2025 pentaoa
+            </a>
+          </p>
+        </div>
       </footer>
     </div>
   );

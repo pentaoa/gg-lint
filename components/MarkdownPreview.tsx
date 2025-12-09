@@ -14,7 +14,7 @@ interface MarkdownPreviewProps {
 export default function MarkdownPreview({ markdown }: MarkdownPreviewProps) {
   return (
     <Card className="p-6 h-full flex flex-col overflow-hidden">
-      <h2 className="text-lg font-semibold mb-4 flex-shrink-0">预览</h2>
+      <h2 className="text-lg font-semibold flex-shrink-0">预览</h2>
       
       <div className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden border rounded-lg p-6 bg-background">
         {markdown ? (
@@ -28,7 +28,7 @@ export default function MarkdownPreview({ markdown }: MarkdownPreviewProps) {
           </div>
         ) : (
           <div className="flex items-center justify-center h-full text-muted-foreground">
-            粘贴或输入内容后，预览将显示在这里
+            输入 Markdown 内容以预览
           </div>
         )}
       </div>

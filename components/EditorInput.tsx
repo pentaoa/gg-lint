@@ -53,8 +53,8 @@ export default function EditorInput({ onConvert, isLoading }: EditorInputProps) 
 
   return (
     <Card className="p-6 h-full flex flex-col">
-      <div className="flex items-center justify-between mb-4">
-        <h2 className="text-lg font-semibold">输入区域</h2>
+      <div className="flex items-center justify-between">
+        <h2 className="text-lg font-semibold">原始文本</h2>
         <Button 
           variant="outline" 
           size="sm" 
@@ -70,12 +70,12 @@ export default function EditorInput({ onConvert, isLoading }: EditorInputProps) 
         value={inputValue}
         onChange={(e) => setInputValue(e.target.value)}
         onPaste={handlePaste}
-        placeholder="直接粘贴网页内容到这里...&#10;&#10;支持：&#10;• 富文本（自动检测 HTML）&#10;• 纯文本（自动转换）&#10;• 复制网页后直接 Ctrl+V / Cmd+V"
+        placeholder="在此粘贴或输入内容..."
         className="flex-1 min-h-[400px] font-mono text-sm resize-none"
         disabled={isLoading}
       />
 
-      <div className="mt-4 flex gap-2">
+      <div className="flex gap-2">
         <Button 
           onClick={handleManualConvert}
           disabled={!inputValue || isLoading}
@@ -84,10 +84,6 @@ export default function EditorInput({ onConvert, isLoading }: EditorInputProps) 
           {isLoading ? "转换中..." : "手动转换"}
         </Button>
       </div>
-
-      <p className="mt-3 text-xs text-muted-foreground">
-        💡 提示：粘贴时会自动转换，或输入后点击「手动转换」
-      </p>
     </Card>
   );
 }
