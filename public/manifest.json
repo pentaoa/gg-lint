@@ -8,12 +8,12 @@
   "theme_color": "#000000",
   "icons": [
     {
-      "src": "/ms-icon-144x144.png",
+      "src": "/icons/ms-icon-144x144.png",
       "sizes": "144x144",
       "type": "image/png"
     },
     {
-      "src": "/ms-icon-310x310.png",
+      "src": "/icons/ms-icon-310x310.png",
       "sizes": "310x310",
       "type": "image/png"
     }

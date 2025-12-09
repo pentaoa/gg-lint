@@ -161,7 +161,38 @@ export async function convertHtmlToMarkdown(html: string): Promise<string> {
                (node.classList.contains('katex-html') || 
                 node.classList.contains('katex-mathml'));
       },
-      replacement: () => '' // 完全忽略，由父级处理
+      replacement: () => '' // 完全忽略,由父级处理
+    });
+
+    // 忽略引用标注元素（如 Google 搜索结果中的上标引用）
+    turndownService.addRule('ignoreCitationMarkers', {
+      filter: (node) => {
+        // 只匹配引用相关的自定义元素和空的引用容器
+        if (node.nodeName === 'SOURCE-FOOTNOTE' || 
+            node.nodeName === 'SOURCES-CAROUSEL-INLINE' ||
+            node.nodeName === 'SOURCE-INLINE-CHIPS' ||
+            node.nodeName === 'SOURCE-INLINE-CHIP') {
+          return true;
+        }
+        // 匹配包含引用数字的按钮和链接容器
+        if ((node.nodeName === 'DIV' || node.nodeName === 'BUTTON') && 
+            node.classList.contains('source-inline-chip-container')) {
+          return true;
+        }
+        return false;
+      },
+      replacement: () => '' // 完全移除引用标注元素
+    });
+
+    // 清理上标引用数字
+    turndownService.addRule('cleanSuperscriptCitations', {
+      filter: (node) => {
+        // 只移除明确的引用上标(包含在 source-footnote 中的 sup)
+        return node.nodeName === 'SUP' && 
+               node.classList.contains('superscript') &&
+               node.closest('source-footnote');
+      },
+      replacement: () => '' // 移除上标数字
     });
 
     // 添加 KaTeX 块级公式支持（katex-display）
@@ -264,7 +295,11 @@ export async function convertHtmlToMarkdown(html: string): Promise<string> {
       }
     });
 
-    const rawMarkdown = turndownService.turndown(html);
+    let rawMarkdown = turndownService.turndown(html);
+    
+    // 清理移除引用标注后留下的多余空格
+    // 匹配：标点符号前的空格（如 "内容 。" -> "内容。"）
+    rawMarkdown = rawMarkdown.replace(/\s+([。，、：；！？,.;:!?])/g, '$1');
 
     // 第二步：使用 remark 修复和规范化
     const file = await unified()
