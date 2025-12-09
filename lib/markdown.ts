@@ -190,7 +190,7 @@ export async function convertHtmlToMarkdown(html: string): Promise<string> {
         // 只移除明确的引用上标(包含在 source-footnote 中的 sup)
         return node.nodeName === 'SUP' && 
                node.classList.contains('superscript') &&
-               node.closest('source-footnote');
+               !!node.closest('source-footnote');
       },
       replacement: () => '' // 移除上标数字
     });
