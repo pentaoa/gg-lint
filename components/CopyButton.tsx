@@ -44,13 +44,13 @@ const CopyButton = forwardRef<CopyButtonHandle, CopyButtonProps>(
       >
         {copied ? (
           <>
-            <Check className="mr-2 h-4 w-4" />
-            已复制！
+            <Check className="h-4 w-4 sm:mr-2" />
+            <span className="hidden sm:inline">已复制！</span>
           </>
         ) : (
           <>
-            <Copy className="mr-2 h-4 w-4" />
-            复制 Markdown ({isMac ? '⌘' : 'Ctrl'}+K)
+            <Copy className="h-4 w-4 sm:mr-2" />
+            <span className="hidden sm:inline">复制 Markdown ({isMac ? '⌘' : 'Ctrl'}+K)</span>
           </>
         )}
       </Button>
