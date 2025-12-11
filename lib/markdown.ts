@@ -154,6 +154,35 @@ export async function convertHtmlToMarkdown(html: string): Promise<string> {
     const gfmTables = turndownPluginGfm.tables;
     turndownService.use(gfmTables);
 
+    // 处理纯文本 LaTeX 公式（用 [ ] 包裹）
+    turndownService.addRule('textLatexBlock', {
+      filter: (node) => {
+        // 匹配包含 [LaTeX] 格式的文本节点
+        if (node.nodeName === 'STRONG' || node.nodeName === 'P') {
+          const text = node.textContent || '';
+          return /^\s*\[[\s\S]*?\]\s*$/.test(text) && text.includes('\\');
+        }
+        return false;
+      },
+      replacement: (content) => {
+        // 提取 [ ] 之间的内容
+        const match = content.match(/^\s*\[\s*([\s\S]*?)\s*\]\s*$/);
+        if (match) {
+          const latex = match[1]
+            .replace(/\\\[/g, '[')  // 处理转义的方括号
+            .replace(/\\\]/g, ']')
+            .trim();
+          // 判断是否为块级公式（包含换行或较长）
+          if (latex.includes('\n') || latex.length > 50) {
+            return '\n\n$$\n' + latex + '\n$$\n\n';
+          } else {
+            return '$' + latex + '$';
+          }
+        }
+        return content;
+      }
+    });
+
     // 忽略 KaTeX 渲染的 HTML 部分（避免重复）
     turndownService.addRule('ignoreKatexHtml', {
       filter: (node) => {
@@ -296,6 +325,64 @@ export async function convertHtmlToMarkdown(html: string): Promise<string> {
     });
 
     let rawMarkdown = turndownService.turndown(html);
+    
+    // 后处理：修复可能被错误转义的数学公式
+    // 处理 \[ LaTeX \] 格式（可能被 Turndown 转义）
+    rawMarkdown = rawMarkdown.replace(/\\\[\s*([\s\S]*?)\s*\\\]/g, (match, latex) => {
+      const cleanLatex = latex.trim();
+      if (cleanLatex.includes('\n') || cleanLatex.length > 50) {
+        return '\n\n$$\n' + cleanLatex + '\n$$\n\n';
+      } else {
+        return '$' + cleanLatex + '$';
+      }
+    });
+    
+    // 修复数学公式中被 Turndown 错误转义的字符
+    // 在 $...$ 和 $$...$$ 中清理所有错误的转义
+    rawMarkdown = rawMarkdown.replace(/\$\$([\s\S]*?)\$\$/g, (match, math) => {
+      const cleaned = math
+        .replace(/\\\\/g, '\\')   // 双反斜杠 \\ 还原为单个 \
+        .replace(/\\_/g, '_')     // 转义的下划线
+        .replace(/\\\*/g, '*')    // 转义的星号
+        .replace(/\\\{/g, '{')    // 转义的花括号
+        .replace(/\\\}/g, '}');
+      return '$$' + cleaned + '$$';
+    });
+    
+    rawMarkdown = rawMarkdown.replace(/\$([^$\n]+)\$/g, (match, math) => {
+      const cleaned = math
+        .replace(/\\\\/g, '\\')   // 双反斜杠 \\ 还原为单个 \
+        .replace(/\\_/g, '_')     // 转义的下划线
+        .replace(/\\\*/g, '*')    // 转义的星号
+        .replace(/\\\{/g, '{')    // 转义的花括号
+        .replace(/\\\}/g, '}');
+      return '$' + cleaned + '$';
+    });
+    
+    // 处理纯文本行内公式 (LaTeX)
+    // 匹配模式：(公式)，其中公式包含反斜杠（LaTeX 命令标志）
+    rawMarkdown = rawMarkdown.replace(/\(([^()]+)\)/g, (match, content) => {
+      // 检查是否包含 LaTeX 命令特征
+      if (content.includes('\\') && (
+        content.includes('\\in') || 
+        content.includes('\\mathbb') || 
+        content.includes('\\times') || 
+        content.includes('phi') ||
+        content.includes('overrightarrow') ||
+        content.includes('overleftarrow') ||
+        /[a-zA-Z]_[a-zA-Z0-9]/.test(content) || // 包含下标
+        /[a-zA-Z]\^[a-zA-Z0-9]/.test(content)   // 包含上标
+      )) {
+        // 清理可能的转义
+        const cleaned = content
+          .replace(/\\\\/g, '\\')
+          .replace(/\\_/g, '_')
+          .replace(/\\\*/g, '*')
+          .trim();
+        return '$' + cleaned + '$';
+      }
+      return match; // 保持原样
+    });
     
     // 清理移除引用标注后留下的多余空格
     // 匹配：标点符号前的空格（如 "内容 。" -> "内容。"）

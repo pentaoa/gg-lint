@@ -85,7 +85,7 @@ export default function Home() {
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-2xl font-bold tracking-tight">GG Lint</h1>
+              <h1 className="text-2xl font-bold tracking-tight font-serif">GG Lint</h1>
               <p className="text-sm text-muted-foreground">
                 格式化和修复 AI 生成的网页富文本
               </p>
@@ -99,7 +99,7 @@ export default function Home() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 min-h-[calc(100vh-300px)]">
           {/* Left: Input */}
           <div className="flex flex-col min-h-[500px] lg:h-auto">
-            <EditorInput onConvert={handleConvert} isLoading={isLoading} />
+            <EditorInput onConvert={handleConvert} isLoading={isLoading} isMac={isMac} />
           </div>
 
           {/* Right: Preview */}

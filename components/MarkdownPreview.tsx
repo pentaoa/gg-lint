@@ -14,8 +14,12 @@ interface MarkdownPreviewProps {
 export default function MarkdownPreview({ markdown }: MarkdownPreviewProps) {
   return (
     <Card className="p-6 h-full flex flex-col overflow-hidden">
-      <h2 className="text-lg font-semibold flex-shrink-0">预览</h2>
-      
+      <div className="flex items-center justify-between">
+        <h2 className="text-lg font-semibold flex-shrink-0">预览</h2>
+        <div className="text-sm text-muted-foreground hidden sm:inline">
+          请务必注意检查复杂公式的渲染是否正确
+        </div>
+      </div>
       <div className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden border rounded-lg p-6 bg-background">
         {markdown ? (
           <div className="markdown-preview max-w-none">
@@ -28,7 +32,7 @@ export default function MarkdownPreview({ markdown }: MarkdownPreviewProps) {
           </div>
         ) : (
           <div className="flex items-center justify-center h-full text-muted-foreground">
-            输入 Markdown 内容以预览
+            在左侧粘贴内容以预览
           </div>
         )}
       </div>

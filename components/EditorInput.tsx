@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -8,11 +8,27 @@ import { Card } from "@/components/ui/card";
 interface EditorInputProps {
   onConvert: (html: string) => void;
   isLoading?: boolean;
+  isMac?: boolean;
 }
 
-export default function EditorInput({ onConvert, isLoading }: EditorInputProps) {
+export default function EditorInput({ onConvert, isLoading, isMac = false }: EditorInputProps) {
   const [inputValue, setInputValue] = useState("");
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  // Keyboard shortcut for clear (Cmd+E / Ctrl+E)
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      const modifierKey = isMac ? e.metaKey : e.ctrlKey;
+      
+      if (modifierKey && e.key === 'e' && !e.shiftKey && inputValue && !isLoading) {
+        e.preventDefault();
+        setInputValue("");
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [inputValue, isLoading, isMac]);
 
   const handlePaste = async (e: React.ClipboardEvent) => {
     e.preventDefault();
@@ -55,13 +71,20 @@ export default function EditorInput({ onConvert, isLoading }: EditorInputProps) 
     <Card className="p-6 h-full flex flex-col">
       <div className="flex items-center justify-between">
         <h2 className="text-lg font-semibold">原始文本</h2>
+        <div className="text-sm text-muted-foreground hidden sm:inline">
+          注：选中文字复制时，请尽量包括上下文信息
+        </div>
         <Button 
           variant="outline" 
           size="sm" 
           onClick={handleClear}
           disabled={!inputValue || isLoading}
+          title={`清空输入 (${isMac ? '⌘' : 'Ctrl'}+E)`}
         >
-          清空
+          <span>清空</span>
+          <kbd className="ml-2 hidden sm:inline-flex h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground opacity-100">
+            <span className="text-xs">{isMac ? '⌘' : 'Ctrl'}</span>E
+          </kbd>
         </Button>
       </div>
       
@@ -81,7 +104,7 @@ export default function EditorInput({ onConvert, isLoading }: EditorInputProps) 
           disabled={!inputValue || isLoading}
           className="flex-1"
         >
-          {isLoading ? "转换中..." : "手动转换"}
+          {isLoading ? "转换中..." : "转换"}
         </Button>
       </div>
     </Card>
