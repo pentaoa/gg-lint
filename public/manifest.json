@@ -8,13 +8,8 @@
   "theme_color": "#000000",
   "icons": [
     {
-      "src": "/icons/ms-icon-144x144.png",
-      "sizes": "144x144",
-      "type": "image/png"
-    },
-    {
-      "src": "/icons/ms-icon-310x310.png",
-      "sizes": "310x310",
+      "src": "/icons/Icon-iOS-Default-1024x1024@1x.png",
+      "sizes": "1024x1024",
       "type": "image/png"
     }
   ]
