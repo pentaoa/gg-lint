@@ -68,8 +68,8 @@ export default function EditorInput({ onConvert, isLoading, isMac = false }: Edi
   };
 
   return (
-    <Card className="p-6 h-full flex flex-col">
-      <div className="flex items-center justify-between">
+    <Card className="p-6 h-full flex flex-col overflow-hidden">
+      <div className="flex items-center justify-between flex-shrink-0">
         <h2 className="text-lg font-semibold">原始文本</h2>
         <div className="text-sm text-muted-foreground hidden sm:inline">
           注：选中文字复制时，请尽量包括上下文信息
@@ -88,17 +88,19 @@ export default function EditorInput({ onConvert, isLoading, isMac = false }: Edi
         </Button>
       </div>
       
-      <Textarea
-        ref={textareaRef}
-        value={inputValue}
-        onChange={(e) => setInputValue(e.target.value)}
-        onPaste={handlePaste}
-        placeholder="在此粘贴或输入内容..."
-        className="flex-1 min-h-[400px] font-mono text-sm resize-none"
-        disabled={isLoading}
-      />
+      <div className="flex-1 min-h-0 flex flex-col">
+        <Textarea
+          ref={textareaRef}
+          value={inputValue}
+          onChange={(e) => setInputValue(e.target.value)}
+          onPaste={handlePaste}
+          placeholder="在此粘贴复制的文本..."
+          className="flex-1 font-mono text-sm resize-none overflow-y-auto"
+          disabled={isLoading}
+        />
+      </div>
 
-      <div className="flex gap-2">
+      <div className="flex gap-2 flex-shrink-0">
         <Button 
           onClick={handleManualConvert}
           disabled={!inputValue || isLoading}

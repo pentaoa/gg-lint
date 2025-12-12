@@ -32,7 +32,7 @@ export default function MarkdownPreview({ markdown }: MarkdownPreviewProps) {
           </div>
         ) : (
           <div className="flex items-center justify-center h-full text-muted-foreground">
-            在左侧粘贴内容以预览
+            粘贴内容以预览
           </div>
         )}
       </div>
