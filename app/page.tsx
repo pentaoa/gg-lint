@@ -7,6 +7,7 @@ import MarkdownPreview from "@/components/MarkdownPreview";
 import CopyButton, { type CopyButtonHandle } from "@/components/CopyButton";
 import { convertHtmlToMarkdown, adjustHeadingLevel } from "@/lib/markdown";
 import { ChevronUp, ChevronDown } from "lucide-react";
+import ThemeToggle from "@/components/ThemeToggle";
 
 export default function Home() {
   const [markdown, setMarkdown] = useState("");
@@ -79,10 +80,10 @@ export default function Home() {
   };
 
   return (
-    <div className="h-screen flex flex-col bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-950 dark:to-slate-900 overflow-hidden">
+    <div className="min-h-screen flex flex-col bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-950 dark:to-slate-900">
       {/* Header */}
-      <header className="border-b bg-white/50 dark:bg-slate-950/50 backdrop-blur-sm flex-shrink-0 z-10">
-        <div className="container mx-auto px-4 py-4">
+      <header className="border-b bg-white/50 dark:bg-slate-950/50 backdrop-blur-sm sticky top-0 z-10">
+        <div className="container mx-auto px-4 py-3">
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-2xl font-bold tracking-tight font-serif">GG Lint</h1>
@@ -90,28 +91,31 @@ export default function Home() {
                 格式化和修复 AI 生成的网页富文本
               </p>
             </div>
+            <ThemeToggle />
           </div>
         </div>
       </header>
 
       {/* Main Content */}
-      <main className="flex-1 min-h-0 overflow-hidden">
-        <div className="container mx-auto px-4 py-6 h-full">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 h-full">
+      <main className="flex-1">
+        <div className="container mx-auto px-4">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* Left: Input */}
-            <div className="flex flex-col min-h-0">
-              <EditorInput onConvert={handleConvert} isLoading={isLoading} isMac={isMac} />
+            <div className="flex flex-col">
+              <div className="sticky top-20 h-[calc(100vh-16rem)]">
+                <EditorInput onConvert={handleConvert} isLoading={isLoading} isMac={isMac} />
+              </div>
             </div>
 
             {/* Right: Preview */}
-            <div className="flex flex-col gap-4 min-h-0">
-              <div className="flex-1 min-h-0">
+            <div className="flex flex-col">
+              <div>
                 <MarkdownPreview markdown={markdown} />
               </div>
               
               {/* Control Buttons */}
-              <div className="flex gap-2 flex-shrink-0">
-                <div className="flex gap-1 flex-1">
+              <div className="sticky flex gap-2 mt-4">
+                <div className="flex gap-2 flex-1">
                   <Button
                     variant="outline"
                     size="lg"
@@ -150,7 +154,7 @@ export default function Home() {
       </main>
 
       {/* Footer */}
-      <footer className="border-t bg-white/50 dark:bg-slate-950/50 backdrop-blur-sm flex-shrink-0 py-4 text-center text-sm text-muted-foreground">
+      <footer className="border-t bg-white/50 dark:bg-slate-950/50 backdrop-blur-sm mt-8 py-4 text-center text-sm text-muted-foreground">
         <div className="container mx-auto px-4 space-y-2">
           <p className="text-xs leading-relaxed">
             我们将定期对 <strong className="text-foreground">Gemini</strong>、

@@ -68,7 +68,7 @@ export default function EditorInput({ onConvert, isLoading, isMac = false }: Edi
   };
 
   return (
-    <Card className="p-6 h-full flex flex-col overflow-hidden">
+    <Card className="p-4 h-full flex flex-col overflow-hidden mt-6 gap-4">
       <div className="flex items-center justify-between flex-shrink-0">
         <h2 className="text-lg font-semibold">原始文本</h2>
         <div className="text-sm text-muted-foreground hidden sm:inline">

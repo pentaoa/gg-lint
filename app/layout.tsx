@@ -28,7 +28,11 @@ export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
   maximumScale: 1,
-  themeColor: "#000000",
+  // 根据系统主题设置 PWA 主题色（浏览器地址栏等）
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#ffffff" },
+    { media: "(prefers-color-scheme: dark)", color: "#0b1220" }
+  ],
 };
 
 export default function RootLayout({
@@ -37,10 +41,44 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="zh-CN">
+    <html lang="zh-CN" suppressHydrationWarning>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
+        {/* 主题初始化脚本：优先使用 localStorage，其次跟随系统 */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(() => {
+              try {
+                const stored = localStorage.getItem('gglint-theme');
+                const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+                const theme = stored || (prefersDark ? 'dark' : 'light');
+                const root = document.documentElement;
+                const setThemeColorMeta = (mode) => {
+                  const meta = document.querySelector('meta[name="theme-color"]');
+                  if (!meta) return;
+                  meta.setAttribute('content', mode === 'dark' ? '#0b1220' : '#ffffff');
+                };
+                if (theme === 'dark') {
+                  root.classList.add('dark');
+                  setThemeColorMeta('dark');
+                } else {
+                  root.classList.remove('dark');
+                  setThemeColorMeta('light');
+                }
+                // 监听系统主题变化（仅当未固定用户选择时）
+                if (!stored) {
+                  const mq = window.matchMedia('(prefers-color-scheme: dark)');
+                  const handler = (e) => {
+                    if (e.matches) { root.classList.add('dark'); setThemeColorMeta('dark'); }
+                    else { root.classList.remove('dark'); setThemeColorMeta('light'); }
+                  };
+                  mq.addEventListener ? mq.addEventListener('change', handler) : mq.addListener(handler);
+                }
+              } catch {}
+            })();`,
+          }}
+        />
         {children}
         <Analytics />
       </body>

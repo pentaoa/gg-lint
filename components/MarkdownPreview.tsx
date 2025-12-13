@@ -13,14 +13,14 @@ interface MarkdownPreviewProps {
 
 export default function MarkdownPreview({ markdown }: MarkdownPreviewProps) {
   return (
-    <Card className="p-6 h-full flex flex-col overflow-hidden">
+    <Card className="p-4 flex flex-col mt-6 gap-4">
       <div className="flex items-center justify-between">
-        <h2 className="text-lg font-semibold flex-shrink-0">预览</h2>
+        <h2 className="text-lg font-semibold">预览</h2>
         <div className="text-sm text-muted-foreground hidden sm:inline">
           请务必注意检查复杂公式的渲染是否正确
         </div>
       </div>
-      <div className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden border rounded-lg p-6 bg-background">
+      <div className="border rounded-lg p-6 bg-background">
         {markdown ? (
           <div className="markdown-preview max-w-none">
             <ReactMarkdown
@@ -31,14 +31,14 @@ export default function MarkdownPreview({ markdown }: MarkdownPreviewProps) {
             </ReactMarkdown>
           </div>
         ) : (
-          <div className="flex items-center justify-center h-full text-muted-foreground">
+          <div className="flex h-[calc(100vh-27.5rem)] items-center justify-center py-20 text-muted-foreground">
             粘贴内容以预览
           </div>
         )}
       </div>
 
       {markdown && (
-        <div className="mt-3 p-3 bg-muted rounded-lg flex-shrink-0">
+        <div className="p-3 bg-muted rounded-lg flex-shrink-0">
           <details className="cursor-pointer">
             <summary className="text-sm font-medium">
               查看 Markdown 源码

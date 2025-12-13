@@ -5,7 +5,7 @@
   "start_url": "/",
   "display": "standalone",
   "background_color": "#ffffff",
-  "theme_color": "#000000",
+  "theme_color": "#0b1220",
   "icons": [
     {
       "src": "/icons/Icon-iOS-Default-1024x1024@1x.png",
