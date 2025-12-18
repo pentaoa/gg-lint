@@ -12,6 +12,7 @@ import ThemeToggle from "@/components/ThemeToggle";
 export default function Home() {
   const [markdown, setMarkdown] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string>("");
   const [isMac, setIsMac] = useState(false);
   const copyButtonRef = useRef<CopyButtonHandle>(null);
 
@@ -50,12 +51,21 @@ export default function Home() {
 
   const handleConvert = async (html: string) => {
     setIsLoading(true);
+    setError("");
     try {
       const result = await convertHtmlToMarkdown(html);
       setMarkdown(result);
     } catch (error) {
       console.error("转换失败:", error);
-      setMarkdown("转换失败，请检查输入内容");
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      
+      if (errorMessage.includes("Body exceeded") || errorMessage.includes("body size limit")) {
+        setError("输入的内容过大，超出限制 (2MB)");
+        setMarkdown("");
+      } else {
+        setError("转换失败，请检查输入内容");
+        setMarkdown("");
+      }
     } finally {
       setIsLoading(false);
     }
@@ -110,7 +120,7 @@ export default function Home() {
             {/* Right: Preview */}
             <div className="flex flex-col">
               <div>
-                <MarkdownPreview markdown={markdown} />
+                <MarkdownPreview markdown={markdown} error={error} />
               </div>
               
               {/* Control Buttons */}

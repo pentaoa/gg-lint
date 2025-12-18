@@ -9,9 +9,10 @@ import "katex/dist/katex.min.css";
 
 interface MarkdownPreviewProps {
   markdown: string;
+  error?: string;
 }
 
-export default function MarkdownPreview({ markdown }: MarkdownPreviewProps) {
+export default function MarkdownPreview({ markdown, error }: MarkdownPreviewProps) {
   return (
     <Card className="p-4 flex flex-col mt-6 gap-4">
       <div className="flex items-center justify-between">
@@ -21,7 +22,14 @@ export default function MarkdownPreview({ markdown }: MarkdownPreviewProps) {
         </div>
       </div>
       <div className="border rounded-lg p-6 bg-background">
-        {markdown ? (
+        {error ? (
+          <div className="flex h-[calc(100vh-27.5rem)] items-center justify-center py-20">
+            <div className="text-center space-y-2">
+              <div className="text-red-600 dark:text-red-400 font-medium">{error}</div>
+              <div className="text-sm text-muted-foreground">建议分批处理或减少粘贴内容</div>
+            </div>
+          </div>
+        ) : markdown ? (
           <div className="markdown-preview max-w-none">
             <ReactMarkdown
               remarkPlugins={[remarkGfm, remarkMath]}

@@ -8,4 +8,12 @@ const nextConfig: NextConfig = {
   },
 };
 
+module.exports = {
+  experimental: {
+    serverActions: {
+      bodySizeLimit: '1mb',
+    },
+  },
+}
+
 export default nextConfig;
