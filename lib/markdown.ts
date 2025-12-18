@@ -1,9 +1,14 @@
 "use server";
 
+import { MathMLToLaTeX } from "mathml-to-latex";
+import type { Heading, Root } from "mdast";
+import remarkGfm from "remark-gfm";
+import remarkMath from "remark-math";
+import remarkParse from "remark-parse";
+import remarkStringify from "remark-stringify";
 import TurndownService from "turndown";
 import { unified } from "unified";
-import { MathMLToLaTeX } from "mathml-to-latex";
-import remarkParse from "remark-parse";
+import { visit } from "unist-util-visit";
 
 /**
  * 修复 mathml-to-latex 转换中缺失反斜杠的 LaTeX 命令
@@ -20,9 +25,9 @@ function fixLaTeXCommands(latex: string): string {
     'sum', 'prod', 'int', 'lim', 'max', 'min',
     'sin', 'cos', 'tan', 'log', 'ln', 'exp'
   ];
-  
+
   let fixed = latex;
-  
+
   // 为每个命令添加反斜杠（如果缺失）
   // 使用词边界匹配，避免误替换（如 "simple" 中的 "sim"）
   commandsToFix.forEach(cmd => {
@@ -30,14 +35,9 @@ function fixLaTeXCommands(latex: string): string {
     const regex = new RegExp(`(?<![\\\\a-zA-Z])\\b${cmd}\\b(?![a-zA-Z])`, 'g');
     fixed = fixed.replace(regex, `\\${cmd}`);
   });
-  
+
   return fixed;
 }
-import remarkGfm from "remark-gfm";
-import remarkStringify from "remark-stringify";
-import remarkMath from "remark-math";
-import type { Root, Heading, Text, PhrasingContent } from "mdast";
-import { visit } from "unist-util-visit";
 
 /**
  * 自定义 remark 插件：修复标题层级（可选）
@@ -47,7 +47,7 @@ import { visit } from "unist-util-visit";
 function remarkFixHeadings() {
   return (tree: Root) => {
     const headings: Heading[] = [];
-    
+
     // 收集所有标题
     visit(tree, "heading", (node: Heading) => {
       headings.push(node);
@@ -56,7 +56,7 @@ function remarkFixHeadings() {
     // 只有在标题不是从合理层级开始时才调整
     if (headings.length > 0) {
       const minDepth = Math.min(...headings.map(h => h.depth));
-      
+
       // 只有当最小层级 > 3 时才调整（例如从 h4 开始的情况）
       // h1, h2, h3 开始都是合理的，保持原样
       if (minDepth > 3) {
@@ -103,7 +103,7 @@ function remarkCleanWhitespace() {
     if (tree.children) {
       const filtered = [];
       let lastWasBreak = false;
-      
+
       for (const child of tree.children) {
         if (child.type === "paragraph" && child.children.length === 0) {
           if (!lastWasBreak) {
@@ -115,7 +115,7 @@ function remarkCleanWhitespace() {
           lastWasBreak = false;
         }
       }
-      
+
       tree.children = filtered;
     }
   };
@@ -186,9 +186,9 @@ export async function convertHtmlToMarkdown(html: string): Promise<string> {
     // 忽略 KaTeX 渲染的 HTML 部分（避免重复）
     turndownService.addRule('ignoreKatexHtml', {
       filter: (node) => {
-        return node.nodeName === 'SPAN' && 
-               (node.classList.contains('katex-html') || 
-                node.classList.contains('katex-mathml'));
+        return node.nodeName === 'SPAN' &&
+          (node.classList.contains('katex-html') ||
+            node.classList.contains('katex-mathml'));
       },
       replacement: () => '' // 完全忽略,由父级处理
     });
@@ -197,15 +197,15 @@ export async function convertHtmlToMarkdown(html: string): Promise<string> {
     turndownService.addRule('ignoreCitationMarkers', {
       filter: (node) => {
         // 只匹配引用相关的自定义元素和空的引用容器
-        if (node.nodeName === 'SOURCE-FOOTNOTE' || 
-            node.nodeName === 'SOURCES-CAROUSEL-INLINE' ||
-            node.nodeName === 'SOURCE-INLINE-CHIPS' ||
-            node.nodeName === 'SOURCE-INLINE-CHIP') {
+        if (node.nodeName === 'SOURCE-FOOTNOTE' ||
+          node.nodeName === 'SOURCES-CAROUSEL-INLINE' ||
+          node.nodeName === 'SOURCE-INLINE-CHIPS' ||
+          node.nodeName === 'SOURCE-INLINE-CHIP') {
           return true;
         }
         // 匹配包含引用数字的按钮和链接容器
-        if ((node.nodeName === 'DIV' || node.nodeName === 'BUTTON') && 
-            node.classList.contains('source-inline-chip-container')) {
+        if ((node.nodeName === 'DIV' || node.nodeName === 'BUTTON') &&
+          node.classList.contains('source-inline-chip-container')) {
           return true;
         }
         return false;
@@ -217,9 +217,9 @@ export async function convertHtmlToMarkdown(html: string): Promise<string> {
     turndownService.addRule('cleanSuperscriptCitations', {
       filter: (node) => {
         // 只移除明确的引用上标(包含在 source-footnote 中的 sup)
-        return node.nodeName === 'SUP' && 
-               node.classList.contains('superscript') &&
-               !!node.closest('source-footnote');
+        return node.nodeName === 'SUP' &&
+          node.classList.contains('superscript') &&
+          !!node.closest('source-footnote');
       },
       replacement: () => '' // 移除上标数字
     });
@@ -260,9 +260,9 @@ export async function convertHtmlToMarkdown(html: string): Promise<string> {
     // 添加 KaTeX 行内公式支持（.katex 容器）
     turndownService.addRule('katexInline', {
       filter: (node) => {
-        return node.nodeName === 'SPAN' && 
-               node.classList.contains('katex') &&
-               !node.closest('.katex-display');
+        return node.nodeName === 'SPAN' &&
+          node.classList.contains('katex') &&
+          !node.closest('.katex-display');
       },
       replacement: (content, node: any) => {
         // 优先从 MathML 的 annotation 节点提取原始 LaTeX
@@ -295,9 +295,9 @@ export async function convertHtmlToMarkdown(html: string): Promise<string> {
     // 兼容带 data-math 属性的自定义数学块
     turndownService.addRule('mathBlockWithAttr', {
       filter: (node) => {
-        return (node.nodeName === 'DIV' || node.nodeName === 'SPAN') && 
-               node.classList.contains('math-block') && 
-               node.getAttribute('data-math') !== null;
+        return (node.nodeName === 'DIV' || node.nodeName === 'SPAN') &&
+          node.classList.contains('math-block') &&
+          node.getAttribute('data-math') !== null;
       },
       replacement: (content, node: any) => {
         const math = node.getAttribute('data-math');
@@ -311,9 +311,9 @@ export async function convertHtmlToMarkdown(html: string): Promise<string> {
     // 兼容带 data-math 属性的行内公式
     turndownService.addRule('mathInlineWithAttr', {
       filter: (node) => {
-        return node.nodeName === 'SPAN' && 
-               node.classList.contains('math-inline') && 
-               node.getAttribute('data-math') !== null;
+        return node.nodeName === 'SPAN' &&
+          node.classList.contains('math-inline') &&
+          node.getAttribute('data-math') !== null;
       },
       replacement: (content, node: any) => {
         const math = node.getAttribute('data-math');
@@ -325,7 +325,7 @@ export async function convertHtmlToMarkdown(html: string): Promise<string> {
     });
 
     let rawMarkdown = turndownService.turndown(html);
-    
+
     // 后处理：修复可能被错误转义的数学公式
     // 处理 \[ LaTeX \] 格式（可能被 Turndown 转义）
     rawMarkdown = rawMarkdown.replace(/\\\[\s*([\s\S]*?)\s*\\\]/g, (match, latex) => {
@@ -336,7 +336,7 @@ export async function convertHtmlToMarkdown(html: string): Promise<string> {
         return '$' + cleanLatex + '$';
       }
     });
-    
+
     // 修复数学公式中被 Turndown 错误转义的字符
     // 在 $...$ 和 $$...$$ 中清理所有错误的转义
     rawMarkdown = rawMarkdown.replace(/\$\$([\s\S]*?)\$\$/g, (match, math) => {
@@ -348,7 +348,7 @@ export async function convertHtmlToMarkdown(html: string): Promise<string> {
         .replace(/\\\}/g, '}');
       return '$$' + cleaned + '$$';
     });
-    
+
     rawMarkdown = rawMarkdown.replace(/\$([^$\n]+)\$/g, (match, math) => {
       const cleaned = math
         .replace(/\\\\/g, '\\')   // 双反斜杠 \\ 还原为单个 \
@@ -358,20 +358,19 @@ export async function convertHtmlToMarkdown(html: string): Promise<string> {
         .replace(/\\\}/g, '}');
       return '$' + cleaned + '$';
     });
-    
+
     // 处理纯文本行内公式 (LaTeX)
-    // 匹配模式：(公式)，其中公式包含反斜杠（LaTeX 命令标志）
-    rawMarkdown = rawMarkdown.replace(/\(([^()]+)\)/g, (match, content) => {
-      // 检查是否包含 LaTeX 命令特征
+    // 仅匹配独立的括号公式，不处理 $...$ 或 $$...$$ 内部的括号
+    // 注意：这个规则很容易误伤函数调用如 p(x)，所以只处理整行是括号公式的情况
+    rawMarkdown = rawMarkdown.replace(/^(\s*)\(([^()]+)\)(\s*)$/gm, (match, before, content, after) => {
+      // 检查是否包含 LaTeX 命令特征，且是独立的公式行
       if (content.includes('\\') && (
-        content.includes('\\in') || 
-        content.includes('\\mathbb') || 
-        content.includes('\\times') || 
-        content.includes('phi') ||
-        content.includes('overrightarrow') ||
-        content.includes('overleftarrow') ||
-        /[a-zA-Z]_[a-zA-Z0-9]/.test(content) || // 包含下标
-        /[a-zA-Z]\^[a-zA-Z0-9]/.test(content)   // 包含上标
+        content.includes('\\in') ||
+        content.includes('\\mathbb') ||
+        content.includes('\\times') ||
+        content.includes('\\phi') ||
+        content.includes('\\overrightarrow') ||
+        content.includes('\\overleftarrow')
       )) {
         // 清理可能的转义
         const cleaned = content
@@ -379,11 +378,11 @@ export async function convertHtmlToMarkdown(html: string): Promise<string> {
           .replace(/\\_/g, '_')
           .replace(/\\\*/g, '*')
           .trim();
-        return '$' + cleaned + '$';
+        return before + '$' + cleaned + '$' + after;
       }
       return match; // 保持原样
     });
-    
+
     // 清理移除引用标注后留下的多余空格
     // 匹配：标点符号前的空格（如 "内容 。" -> "内容。"）
     rawMarkdown = rawMarkdown.replace(/\s+([。，、：；！？,.;:!?])/g, '$1');
