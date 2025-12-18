@@ -88,7 +88,7 @@ export default function Home() {
             <div>
               <h1 className="text-2xl font-bold tracking-tight font-serif">GG Lint</h1>
               <p className="text-sm text-muted-foreground">
-                格式化和修复 AI 生成的网页富文本
+                GPT Generated Content Linter
               </p>
             </div>
             <ThemeToggle />

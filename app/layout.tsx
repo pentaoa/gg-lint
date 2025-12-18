@@ -14,8 +14,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "gg-lint - Markdown 格式修复工具",
-  description: "把由 Chatbot 生成的富文本网页转换成干净、规范的 Markdown，支持 Obsidian、Typora、Notion",
+  title: "GG lint - GPT Generated Content Linter",
+  description: "A simple tool to convert messy HTML from chatbots into clean Markdown format.",
   manifest: "/manifest.json",
   appleWebApp: {
     capable: true,
