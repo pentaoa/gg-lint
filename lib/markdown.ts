@@ -1,5 +1,3 @@
-"use server";
-
 import { MathMLToLaTeX } from "mathml-to-latex";
 import type { Heading, Root } from "mdast";
 import remarkGfm from "remark-gfm";
@@ -9,6 +7,8 @@ import remarkStringify from "remark-stringify";
 import TurndownService from "turndown";
 import { unified } from "unified";
 import { visit } from "unist-util-visit";
+// @ts-expect-error - turndown-plugin-gfm doesn't have types
+import { tables } from "turndown-plugin-gfm";
 
 /**
  * 修复 mathml-to-latex 转换中缺失反斜杠的 LaTeX 命令
@@ -150,9 +150,7 @@ export async function convertHtmlToMarkdown(html: string): Promise<string> {
     });
 
     // 添加 GFM 表格支持
-    const turndownPluginGfm = require('turndown-plugin-gfm');
-    const gfmTables = turndownPluginGfm.tables;
-    turndownService.use(gfmTables);
+    turndownService.use(tables);
 
     // 处理纯文本 LaTeX 公式（用 [ ] 包裹）
     turndownService.addRule('textLatexBlock', {
