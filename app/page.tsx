@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import EditorInput from "@/components/EditorInput";
 import MarkdownPreview from "@/components/MarkdownPreview";
 import CopyButton, { type CopyButtonHandle } from "@/components/CopyButton";
+import OfficeCopyButton, { type OfficeCopyButtonHandle } from "@/components/OfficeCopyButton";
 import { convertHtmlToMarkdown, adjustHeadingLevel } from "@/lib/markdown";
 import { ChevronUp, ChevronDown } from "lucide-react";
 import ThemeToggle from "@/components/ThemeToggle";
@@ -15,6 +16,7 @@ export default function Home() {
   const [error, setError] = useState<string>("");
   const [isMac, setIsMac] = useState(false);
   const copyButtonRef = useRef<CopyButtonHandle>(null);
+  const officeCopyButtonRef = useRef<OfficeCopyButtonHandle>(null);
 
   // Detect OS for keyboard shortcuts
   useEffect(() => {
@@ -124,8 +126,8 @@ export default function Home() {
               </div>
               
               {/* Control Buttons */}
-              <div className="sticky flex gap-2 mt-4">
-                <div className="flex gap-2 flex-1">
+              <div className="sticky flex flex-col gap-2 mt-4">
+                <div className="flex gap-2">
                   <Button
                     variant="outline"
                     size="lg"
@@ -149,13 +151,22 @@ export default function Home() {
                     降低层级
                   </Button>
                 </div>
-                <div className="flex-1">
-                  <CopyButton 
-                    ref={copyButtonRef}
-                    markdown={markdown} 
-                    disabled={isLoading}
-                    isMac={isMac}
-                  />
+                <div className="flex gap-2">
+                  <div className="flex-1">
+                    <CopyButton 
+                      ref={copyButtonRef}
+                      markdown={markdown} 
+                      disabled={isLoading}
+                      isMac={isMac}
+                    />
+                  </div>
+                  <div className="flex-1">
+                    <OfficeCopyButton 
+                      ref={officeCopyButtonRef}
+                      markdown={markdown} 
+                      disabled={isLoading}
+                    />
+                  </div>
                 </div>
               </div>
             </div>
