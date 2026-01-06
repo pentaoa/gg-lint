@@ -233,7 +233,7 @@ export async function extractPlainText(markdown: string): Promise<string> {
     .replace(/\*(.*?)\*/g, "$1") // 移除斜体
     .replace(/`(.*?)`/g, "$1") // 移除行内代码
     .replace(/```[\s\S]*?```/g, "") // 移除代码块
-    .replace(/\$\$(.*?)\$\$/gs, "$1") // 移除块级公式标记
+    .replace(/\$\$([\s\S]*?)\$\$/g, "$1") // 移除块级公式标记
     .replace(/\$(.*?)\$/g, "$1") // 移除行内公式标记
     .replace(/\[([^\]]+)\]\([^\)]+\)/g, "$1") // 移除链接，保留文本
     .replace(/^\s*[-*+]\s+/gm, "") // 移除列表标记
