@@ -92,10 +92,9 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
         mq.addEventListener("change", handler);
         return () => mq.removeEventListener("change", handler);
       } else {
-        // @ts-expect-error - 兼容旧版浏览器
+        // 兼容旧版浏览器
         mq.addListener(handler);
         return () => {
-          // @ts-expect-error - 兼容旧版浏览器
           mq.removeListener(handler);
         };
       }
