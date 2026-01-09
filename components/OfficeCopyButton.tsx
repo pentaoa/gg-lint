@@ -4,6 +4,7 @@ import { useState, useImperativeHandle, forwardRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Check, FileText } from "lucide-react";
 import { convertMarkdownToOfficeHTML, extractPlainText } from "@/lib/office-export";
+import { useLanguage } from "@/lib/language-context";
 
 interface OfficeCopyButtonProps {
   markdown: string;
@@ -16,6 +17,7 @@ export interface OfficeCopyButtonHandle {
 
 const OfficeCopyButton = forwardRef<OfficeCopyButtonHandle, OfficeCopyButtonProps>(
   ({ markdown, disabled = false }, ref) => {
+    const { t } = useLanguage();
     const [copied, setCopied] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
 
@@ -42,15 +44,15 @@ const OfficeCopyButton = forwardRef<OfficeCopyButtonHandle, OfficeCopyButtonProp
         setCopied(true);
         setTimeout(() => setCopied(false), 3000);
       } catch (error) {
-        console.error("复制到 Office 失败:", error);
+        console.error(t("button.office.failed"), error);
         // 降级：尝试复制纯文本
         try {
           await navigator.clipboard.writeText(markdown);
           setCopied(true);
           setTimeout(() => setCopied(false), 3000);
         } catch (fallbackError) {
-          console.error("降级复制也失败:", fallbackError);
-          alert("复制失败，请手动复制内容");
+          console.error(t("button.office.failed"), fallbackError);
+          alert(t("button.office.failed"));
         }
       } finally {
         setIsLoading(false);
@@ -68,23 +70,23 @@ const OfficeCopyButton = forwardRef<OfficeCopyButtonHandle, OfficeCopyButtonProp
         size="lg"
         variant="outline"
         className="w-full"
-        title="复制为 Office 格式（Word/PowerPoint）"
+        title={t("button.office.title")}
       >
         {isLoading ? (
           <>
             <div className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent mr-2" />
-            <span className="hidden sm:inline">转换中...</span>
+            <span className="hidden sm:inline">{t("button.office.loading")}</span>
           </>
         ) : copied ? (
           <>
             <Check className="h-4 w-4 sm:mr-2" />
-            <span className="hidden sm:inline">已复制！</span>
+            <span className="hidden sm:inline">{t("button.office.copied")}</span>
           </>
         ) : (
           <>
             <FileText className="h-4 w-4 sm:mr-2" />
-            <span className="hidden sm:inline">复制为 Office 格式</span>
-            <span className="sm:hidden">Office</span>
+            <span className="hidden sm:inline">{t("button.office")}</span>
+            <span className="sm:hidden">{t("button.office.short")}</span>
           </>
         )}
       </Button>

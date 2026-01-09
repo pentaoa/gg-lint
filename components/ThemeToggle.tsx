@@ -2,40 +2,72 @@
 
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Moon, Sun } from "lucide-react";
+import { Moon, Sun, Monitor } from "lucide-react";
+import { useTheme } from "@/lib/theme-context";
+import { useLanguage } from "@/lib/language-context";
 
 export default function ThemeToggle() {
-  const [isDark, setIsDark] = useState<boolean>(false);
+  const { theme, setTheme, effectiveTheme } = useTheme();
+  const { t } = useLanguage();
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    const root = document.documentElement;
-    setIsDark(root.classList.contains("dark"));
+    setMounted(true);
   }, []);
 
-  const toggle = () => {
-    const root = document.documentElement;
-    const next = !isDark;
-    setIsDark(next);
-    const setThemeColorMeta = (mode: 'dark' | 'light') => {
-      const meta = document.querySelector('meta[name="theme-color"]');
-      if (!meta) return;
-      meta.setAttribute('content', mode === 'dark' ? '#0b1220' : '#ffffff');
-    };
-    if (next) {
-      root.classList.add("dark");
-      setThemeColorMeta('dark');
-      try { localStorage.setItem("gglint-theme", "dark"); } catch {}
+  if (!mounted) {
+    return (
+      <Button variant="outline" size="sm" disabled>
+        <Sun className="h-4 w-4" />
+        <span className="ml-2 hidden sm:inline">{t("toggle.theme.auto")}</span>
+      </Button>
+    );
+  }
+
+  const cycleTheme = () => {
+    // 循环切换：light -> dark -> auto -> light
+    if (theme === "light") {
+      setTheme("dark");
+    } else if (theme === "dark") {
+      setTheme("auto");
     } else {
-      root.classList.remove("dark");
-      setThemeColorMeta('light');
-      try { localStorage.setItem("gglint-theme", "light"); } catch {}
+      setTheme("light");
+    }
+  };
+
+  const getIcon = () => {
+    if (theme === "auto") {
+      return <Monitor className="h-4 w-4" />;
+    }
+    return effectiveTheme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />;
+  };
+
+  const getLabel = () => {
+    if (theme === "auto") {
+      return t("toggle.theme.auto");
+    }
+    return effectiveTheme === "dark" ? t("toggle.theme.dark") : t("toggle.theme.light");
+  };
+
+  const getTitle = () => {
+    if (theme === "light") {
+      return `${t("toggle.theme.light")} - ${t("toggle.theme.title")}`;
+    } else if (theme === "dark") {
+      return `${t("toggle.theme.dark")} - ${t("toggle.theme.title")}`;
+    } else {
+      return `${t("toggle.theme.auto")} (${effectiveTheme === "dark" ? t("toggle.theme.dark") : t("toggle.theme.light")}) - ${t("toggle.theme.title")}`;
     }
   };
 
   return (
-    <Button variant="outline" size="sm" onClick={toggle} title={isDark ? "切换到浅色" : "切换到深色"}>
-      {isDark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
-      <span className="ml-2 hidden sm:inline">{isDark ? "日" : "夜"}</span>
+    <Button 
+      variant="outline" 
+      size="sm" 
+      onClick={cycleTheme} 
+      title={getTitle()}
+    >
+      {getIcon()}
+      <span className="ml-2 hidden sm:inline">{getLabel()}</span>
     </Button>
   );
 }
