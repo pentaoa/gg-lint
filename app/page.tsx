@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
+import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import EditorInput from "@/components/EditorInput";
 import MarkdownPreview from "@/components/MarkdownPreview";
@@ -12,6 +13,12 @@ import ThemeToggle from "@/components/ThemeToggle";
 import LanguageToggle from "@/components/LanguageToggle";
 import ModeToggle from "@/components/ModeToggle";
 import { useLanguage } from "@/lib/language-context";
+import {
+  ICP_BEIAN,
+  ICP_BEIAN_URL,
+  POLICE_BEIAN,
+  POLICE_BEIAN_URL,
+} from "@/lib/beian";
 
 export default function Home() {
   const { t, language } = useLanguage();
@@ -270,6 +277,31 @@ export default function Home() {
               className="underline hover:text-foreground"
             >
               © 2025 pentaoa
+            </a>
+          </p>
+          <p className="text-xs flex flex-wrap items-center justify-center gap-x-4 gap-y-1">
+            <a
+              href={POLICE_BEIAN_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1 hover:underline hover:text-foreground"
+            >
+              <Image
+                src="/beian-police.png"
+                alt=""
+                aria-hidden="true"
+                width={18}
+                height={19}
+              />
+              {POLICE_BEIAN}
+            </a>
+            <a
+              href={ICP_BEIAN_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hover:underline hover:text-foreground"
+            >
+              {ICP_BEIAN}
             </a>
           </p>
         </div>
